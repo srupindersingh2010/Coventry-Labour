@@ -1,0 +1,40 @@
+name: Daily Data Update & Deploy
+
+on:
+  schedule:
+    - cron: '0 7 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
+jobs:
+  update-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4.2.2
+
+      - name: Set up Python
+        uses: actions/setup-python@v5.6.0
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: |
+          pip install requests beautifulsoup4 lxml
+
+      - name: Run scraper
+        run: python scrape.py
+
+      - name: Commit updated data
+        run: |
+          git config user.name  "Coventry Labour Bot"
+          git config user.email "bot@coventrylabour.local"
+          git add data/
+          git diff --staged --quiet || git commit -m "Auto-update data $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git push
