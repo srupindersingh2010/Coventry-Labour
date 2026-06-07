@@ -7,16 +7,16 @@
     "status": "Active Priority",
     "source": "data.police.uk",
     "sourceUrl": "https://data.police.uk",
-    "fetchedAt": "7 June 2026 at 21:46"
+    "fetchedAt": "7 June 2026 at 22:08"
   },
   {
     "title": "Shoplifting",
     "neighbourhood": "Coventry",
-    "issue": "Retail theft across city commercial hubs.",
-    "action": "High-visibility controls.",
+    "issue": "Retail theft in city center.",
+    "action": "High-visibility patrols.",
     "status": "Active Priority",
     "source": "data.police.uk",
     "sourceUrl": "https://data.police.uk",
-    "fetchedAt": "7 June 2026 at 21:46"
+    "fetchedAt": "7 June 2026 at 22:08"
   }
 ]
