@@ -55,14 +55,11 @@ def fmt_date(iso_date):
 
 # =============================================================================
 # 1. LABOUR COUNCILLORS
-# Scrapes the full councillor list, filters for Labour only,
-# then fetches each profile page for contact details.
 # =============================================================================
 def scrape_councillors():
     print("\n-- Labour Councillors --")
     councillors = []
 
-    # Step 1: Get the full councillor list (all parties, all wards)
     list_url = f"{EDEM_BASE}/mgMemberIndex.aspx?FN=WARD&VW=LIST&PIC=1"
     r = safe_get(list_url)
     if not r or r.status_code != 200:
@@ -71,10 +68,8 @@ def scrape_councillors():
         return
 
     soup = BeautifulSoup(r.text, "html.parser")
-
-    # Parse each ward section
     current_ward = ""
-    entries = []  # list of {uid, name, ward, party, photo}
+    entries = []
 
     for tag in soup.find_all(["h2", "li"]):
         if tag.name == "h2":
@@ -90,7 +85,6 @@ def scrape_councillors():
                 continue
             uid = uid_m.group(1)
 
-            # Party text is in the li but outside the link
             li_text = tag.get_text(" ", strip=True)
             party = ""
             for p in ["Labour", "Conservative", "Green", "Reform", "Liberal"]:
@@ -98,13 +92,11 @@ def scrape_councillors():
                     party = p
                     break
 
-            # Photo URL from img tag
             img = tag.find("img")
             photo = ""
             if img and img.get("src"):
                 src = img["src"]
                 photo = src if src.startswith("http") else EDEM_BASE + src
-                # Use bigpic instead of smallpic for better quality
                 photo = photo.replace("smallpic", "bigpic")
 
             entries.append({
@@ -116,22 +108,18 @@ def scrape_councillors():
                 "profileUrl": f"{EDEM_BASE}/mgUserInfo.aspx?UID={uid}"
             })
 
-    # Filter Labour only
     labour_entries = [e for e in entries if e["party"] == "Labour"]
     print(f"  Total councillors found: {len(entries)}, Labour: {len(labour_entries)}")
 
-    # Step 2: Fetch each Labour councillor's profile for contact details
     for i, cllr in enumerate(labour_entries):
         print(f"  Profile {i+1}/{len(labour_entries)}: {cllr['name']}")
         profile = scrape_councillor_profile(cllr["uid"])
         cllr.update(profile)
         cllr["fetchedAt"] = STAMP
         councillors.append(cllr)
-        # Be polite — small delay between requests
-        time.sleep(0.5)
+        time.sleep(0.2)
 
     print(f"  Total Labour councillors scraped: {len(councillors)}")
-    # Sort by ward then name
     councillors.sort(key=lambda x: (x.get("ward",""), x.get("name","")))
     write_json("councillors.json", councillors)
 
@@ -139,12 +127,11 @@ def scrape_councillor_profile(uid):
     """Fetch contact details from an individual councillor's profile page."""
     r = safe_get(f"{EDEM_BASE}/mgUserInfo.aspx?UID={uid}")
     if not r or r.status_code != 200:
-        return {}
+        return {"email":"","phone":"","surgery":"","role":"","committeeRole":"","bio":""}
 
     soup = BeautifulSoup(r.text, "html.parser")
     text = soup.get_text(" ", strip=True)
 
-    # Email
     email = ""
     email_tag = soup.find("a", href=re.compile(r'mailto:', re.I))
     if email_tag:
@@ -154,29 +141,25 @@ def scrape_councillor_profile(uid):
         if em:
             email = em.group()
 
-    # Phone
     phone = ""
     phone_m = re.search(r'(?:Bus\.?\s*phone|Phone|Tel)[:\s]*([\d\s]{10,15})', text, re.I)
     if phone_m:
         phone = phone_m.group(1).strip()
 
-    # Surgery details
     surgery = ""
     surgery_m = re.search(r'Surgery[^:]*:(.*?)(?:Contact|$)', text, re.I | re.S)
     if surgery_m:
         surgery = " ".join(surgery_m.group(1).split())[:300]
 
-    # Cabinet role / responsibilities
     role = ""
     role_tag = soup.find("a", href=re.compile(r'mgExecPostDetails', re.I))
     if role_tag:
         role = role_tag.get_text(strip=True)
 
-    # --- Committee & Scrutiny Board Chair Extraction Engine ---
+    # Initialize variables cleanly to ensure execution never breaks
     committee_role = ""
     chairs_found = []
 
-    # Map text patterns found in profile timelines/tables to clean titles
     patterns = [
         (r"Scrutiny Co-ordination Committee", "Chair of Scrutiny Co-ordination"),
         (r"Finance and Corporate Services Scrutiny Board\s*\(\s*1\s*\)", "Chair of Scrutiny Board (1)"),
@@ -189,7 +172,6 @@ def scrape_councillor_profile(uid):
         (r"Audit and Procurement Committee", "Chair of Audit Committee")
     ]
 
-    # Traverse layout nodes looking for references to "Chair" or "Chairman"
     for element in soup.find_all(["li", "p", "td", "div"]):
         el_text = " ".join(element.get_text(" ", strip=True).split())
         if "chair" in el_text.lower() or "chairman" in el_text.lower():
@@ -201,7 +183,6 @@ def scrape_councillor_profile(uid):
     if chairs_found:
         committee_role = " & ".join(chairs_found)
 
-    # Bio/statement (councillors sometimes add a personal statement)
     bio = ""
     for p in soup.find_all("p"):
         pt = p.get_text(strip=True)
@@ -260,7 +241,65 @@ def scrape_news():
             })
             if len(entries) >= 8:
                 break
-        # Fallback h2 scan
         if not entries:
             for h2 in soup.find_all("h2"):
-                a = h2.find("a", href=True
+                a = h2.find("a", href=True)
+                if not a:
+                    continue
+                title = a.get_text(strip=True)
+                href  = a["href"]
+                if not href or not title or len(title) < 10 or "/news" not in href:
+                    continue
+                link = href if href.startswith("http") else "https://www.coventry.gov.uk" + href
+                entries.append({
+                    "title": title, "summary": "", "link": link,
+                    "date": "Recent", "focused": len(entries) == 0,
+                    "source": "coventry.gov.uk/news",
+                    "sourceUrl": "https://www.coventry.gov.uk/news",
+                    "fetchedAt": STAMP
+                })
+                if len(entries) >= 8:
+                    break
+    if not entries:
+        entries = [{"title": "Visit Coventry Council for the latest news",
+                    "link": "https://www.coventry.gov.uk/news",
+                    "date": "See website", "summary": "", "focused": True,
+                    "source": "coventry.gov.uk/news",
+                    "sourceUrl": "https://www.coventry.gov.uk/news",
+                    "fetchedAt": STAMP}]
+    write_json("news.json", entries)
+
+# =============================================================================
+# 3. POLICE DATA
+# =============================================================================
+def scrape_police():
+    print("\n-- Police Data --")
+    priorities = []
+    neighbourhoods = [
+        "west-midlands/stoke-and-wyken",
+        "west-midlands/lower-stoke",
+        "west-midlands/foleshill",
+        "west-midlands/binley-and-willenhall",
+        "west-midlands/earlsdon",
+        "west-midlands/radford",
+        "west-midlands/bablake",
+    ]
+    for nb in neighbourhoods:
+        try:
+            r = requests.get(f"https://data.police.uk/api/priorities?neighbourhood={nb}", timeout=10)
+            if r.status_code == 200:
+                for item in r.json():
+                    t = item.get("issue_title", "")
+                    if not t:
+                        continue
+                    issue  = re.sub(r'<[^>]+>', '', item.get("issue",  "")).strip()
+                    action = re.sub(r'<[^>]+>', '', item.get("action", "")).strip()
+                    nb_label = nb.split("/")[-1].replace("-", " ").title()
+                    priorities.append({
+                        "title":        t,
+                        "neighbourhood": nb_label,
+                        "issue":        issue or "Current policing priority.",
+                        "action":       action or "Active policing response in place.",
+                        "status":       "Active Priority",
+                        "source":       "data.police.uk",
+                        "sourceUrl":    f"
