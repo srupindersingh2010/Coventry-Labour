@@ -11,7 +11,6 @@
       --charcoal: #2C3E50;
       --light-bg: #F8F9FA;
       --rose-bg: #FFF5F5;
-      --slate-blue: #34495E;
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body { font-family: 'Helvetica Neue', Arial, sans-serif; line-height: 1.6; color: #333; background: var(--light-bg); }
@@ -48,6 +47,12 @@
     .page-bar { background: var(--charcoal); color: #FFF; padding: 11px 18px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; margin-bottom: 22px; gap: 8px; font-size: 0.9rem; }
     .live-badge { background: var(--labour-red); padding: 3px 12px; border-radius: 3px; font-size: 0.78rem; font-weight: bold; letter-spacing: 0.5px; }
 
+    /* ── SECTION HEADER ── */
+    .sec-hdr { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; border-bottom: 2px solid #F0F0F0; padding-bottom: 10px; margin-bottom: 16px; }
+    .sec-hdr h2, .sec-hdr h3 { margin: 0; }
+    .sec-hdr a { margin-left: auto; font-size: 0.82rem; color: var(--labour-red); text-decoration: none; font-weight: bold; }
+    .fetch-stamp { font-size: 0.75rem; color: #aaa; }
+
     /* ── STATS ROW ── */
     .stats-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px,1fr)); gap: 14px; margin-bottom: 24px; }
     .stat-card { background: var(--rose-bg); border-top: 3px solid var(--labour-red); padding: 16px; border-radius: 6px; text-align: center; }
@@ -64,12 +69,8 @@
     .cllr-body { padding: 14px 16px; }
     .cllr-name { font-size: 1rem; font-weight: bold; color: var(--charcoal); margin-bottom: 2px; }
     .cllr-ward { font-size: 0.8rem; color: var(--labour-red); font-weight: 600; text-transform: uppercase; letter-spacing: 0.4px; margin-bottom: 8px; }
-    
-    /* Dual Badging Engine */
-    .cllr-role-container { display: flex; flex-direction: column; gap: 5px; margin-bottom: 8px; }
-    .cllr-role { font-size: 0.76rem; background: var(--rose-bg); color: var(--labour-dark); padding: 4px 8px; border-radius: 3px; display: inline-block; font-weight: 600; border-left: 3px solid var(--labour-red); text-align: center; }
-    .cllr-committee-role { font-size: 0.76rem; background: #EDF2F7; color: var(--slate-blue); padding: 4px 8px; border-radius: 3px; display: inline-block; font-weight: 600; border-left: 3px solid var(--charcoal); text-align: center; }
-    
+    .cllr-role { font-size: 0.78rem; background: var(--rose-bg); color: var(--labour-dark); padding: 3px 8px; border-radius: 3px; display: inline-block; margin-bottom: 8px; font-weight: 600; }
+    .cllr-committee-role { font-size: 0.78rem; background: #EDF2F7; color: #2C3E50; padding: 3px 8px; border-radius: 3px; display: inline-block; margin-bottom: 8px; font-weight: 600; border-left: 3px solid var(--charcoal); }
     .cllr-contact { font-size: 0.82rem; color: #555; line-height: 1.9; }
     .cllr-contact a { color: var(--labour-red); text-decoration: none; }
     .cllr-contact a:hover { text-decoration: underline; }
@@ -83,26 +84,39 @@
     .ward-filter { padding: 10px 14px; border: 2px solid #EAEAEA; border-radius: 6px; font-size: 0.95rem; background: #FFF; }
     .ward-filter:focus { outline: none; border-color: var(--labour-red); }
 
-    /* ── NEWS & POLICE ── */
+    /* ── NEWS ── */
     .news-list { display: flex; flex-direction: column; gap: 12px; }
     .news-item { background: #FFF; border: 1px solid #EAEAEA; border-radius: 6px; padding: 16px 20px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
     .news-item.featured { border-left: 4px solid #2ECC71; }
+    .news-item h4 { font-size: 0.97rem; color: #111; margin-bottom: 4px; }
+    .news-meta { font-size: 0.78rem; color: #888; }
     .news-summary { font-size: 0.84rem; color: #555; margin: 4px 0; line-height: 1.5; }
     .read-link { color: var(--labour-red); font-weight: bold; text-decoration: none; font-size: 0.88rem; white-space: nowrap; flex-shrink: 0; }
+
+    /* ── POLICE ── */
     .police-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px,1fr)); gap: 14px; }
     .police-card { background: #FFF; border: 1px solid #EAEAEA; border-left: 4px solid var(--charcoal); border-radius: 4px; padding: 14px 16px; }
     .police-card .nb { font-size: 0.72rem; background: var(--charcoal); color: #FFF; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-bottom: 6px; }
+    .police-card h4 { font-size: 0.95rem; color: var(--charcoal); margin-bottom: 6px; }
+    .police-card p  { font-size: 0.84rem; color: #555; line-height: 1.5; }
+
+    /* ── COMMUNITY LINKS ── */
     .link-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px,1fr)); gap: 14px; }
-    .link-card { background: #FFF; border: 1px solid #EAEAEA; border-radius: 8px; padding: 18px; display: flex; align-items: flex-start; gap: 14px; }
+    .link-card { background: #FFF; border: 1px solid #EAEAEA; border-radius: 8px; padding: 18px; display: flex; align-items: flex-start; gap: 14px; transition: box-shadow 0.2s; }
+    .link-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,0.08); }
     .link-card .icon { font-size: 1.8rem; flex-shrink: 0; }
-    .link-card a { color: var(--labour-red); font-size: 0.84rem; font-weight: bold; text-decoration: none; }
+    .link-card h4 { font-size: 0.96rem; color: var(--charcoal); margin-bottom: 4px; }
+    .link-card p  { font-size: 0.82rem; color: #666; margin-bottom: 8px; }
+    .link-card a  { color: var(--labour-red); font-size: 0.84rem; font-weight: bold; text-decoration: none; }
 
     footer { text-align: center; padding: 28px 15px; margin-top: 30px; background: var(--charcoal); color: #CCC; font-size: 0.82rem; }
     footer a { color: #AAA; }
-    .sec-hdr { display: flex; align-items: baseline; flex-wrap: wrap; gap: 8px; border-bottom: 2px solid #F0F0F0; padding-bottom: 10px; margin-bottom: 16px; }
-    .fetch-stamp { font-size: 0.75rem; color: #aaa; }
-    .loading { text-align: center; padding: 40px; color: #aaa; }
-    .empty-state { text-align: center; padding: 40px; color: #777; background: #F8F9FA; border-radius: 8px; border: 1px dashed #CBD5E0; }
+
+    @media (max-width: 700px) {
+      header h1 { font-size: 1.6rem; }
+      .tab-link { padding: 10px 12px; font-size: 0.82rem; }
+      .news-item { flex-direction: column; align-items: flex-start; }
+    }
   </style>
 </head>
 <body>
@@ -163,7 +177,7 @@
     </div>
 
     <div class="search-wrap">
-      <input type="text" id="cllr-search" placeholder="🔍 Search by name, ward, or role…" oninput="filterCouncillors()">
+      <input type="text" id="cllr-search" placeholder="🔍 Search by name, ward, role or board..." oninput="filterCouncillors()">
       <select class="ward-filter" id="ward-filter" onchange="filterCouncillors()">
         <option value="">All Wards</option>
       </select>
@@ -173,136 +187,211 @@
   </div>
 
   <div id="page2" class="page-view">
+    <div class="page-bar">
+      <span>📰 Coventry Council News</span>
+      <span class="live-badge">LIVE DATA</span>
+    </div>
     <div class="card card-red">
       <div class="sec-hdr">
         <h2>📰 Latest Council News</h2>
         <span class="fetch-stamp" id="ts-news"></span>
+        <a href="https://www.coventry.gov.uk/news" target="_blank">All Coventry news →</a>
       </div>
       <div class="news-list" id="news-box"><div class="loading">Loading news…</div></div>
     </div>
   </div>
 
   <div id="page3" class="page-view">
+    <div class="page-bar">
+      <span>🛡️ Policing Priorities — Coventry Neighbourhoods</span>
+      <span class="live-badge">LIVE DATA</span>
+    </div>
     <div class="card card-dark">
       <div class="sec-hdr">
         <h3>🎯 Current Neighbourhood Policing Priorities</h3>
         <span class="fetch-stamp" id="ts-police"></span>
+        <a href="https://www.westmidlands.police.uk/your-area/west-midlands/coventry/" target="_blank">WM Police Coventry →</a>
       </div>
+      <p style="font-size:0.87rem;color:#666;margin-bottom:16px;">Policing priorities reported for Coventry neighbourhoods. Data from West Midlands Police via the open data.police.uk API.</p>
       <div class="police-grid" id="police-box"><div class="loading">Loading police data…</div></div>
     </div>
   </div>
 
   <div id="page4" class="page-view">
+    <div class="page-bar"><span>📅 Community Events &amp; What's On in Coventry</span></div>
     <div class="card card-red">
       <div class="sec-hdr"><h2>🎉 Find Events &amp; Activities in Coventry</h2></div>
       <div class="link-grid">
-        <div class="link-card"><div class="icon">🎭</div><div><h4>Coventry Rocks</h4><p>Local family activities.</p><a href="https://www.coventryrocks.co.uk" target="_blank">coventryrocks.co.uk →</a></div></div>
-        <div class="link-card"><div class="icon">🗓️</div><div><h4>Visit Coventry</h4><p>Tourism and events.</p><a href="https://visitcoventry.co.uk" target="_blank">visitcoventry.co.uk →</a></div></div>
+        <div class="link-card">
+          <div class="icon">🏛️</div>
+          <div><h4>Coventry City Council Events</h4><p>Official council events, public meetings and council-run activities.</p><a href="https://www.coventry.gov.uk/events" target="_blank">coventry.gov.uk/events →</a></div>
+        </div>
+        <div class="link-card">
+          <div class="icon">🎭</div>
+          <div><h4>Coventry Rocks</h4><p>Local events, activities and what's happening across Coventry.</p><a href="https://www.coventryrocks.co.uk" target="_blank">coventryrocks.co.uk →</a></div>
+        </div>
       </div>
     </div>
   </div>
 
   <div id="page5" class="page-view">
+    <div class="page-bar"><span>📋 Contact &amp; Useful Links</span></div>
     <div class="card card-red">
-      <h2>📋 Contact Coventry Labour</h2>
-      <p style="margin-top:10px; font-size:0.9rem; color:#555;">Council House · Earl Street · Coventry CV1 5RR · 📞 024 7697 5555</p>
+      <div class="sec-hdr"><h2>📋 Contact Coventry Labour</h2></div>
+      <p><a href="https://www.coventrylabour.org.uk" target="_blank" style="color:var(--labour-red);">coventrylabour.org.uk</a></p>
     </div>
   </div>
 
 </div>
 
 <footer>
-  <p>© Coventry Labour Councillors — Daily eDemocracy Data Synchronization.</p>
+  <p>© <span id="yr"></span> Coventry Labour Councillors — Data updated daily</p>
 </footer>
 
 <script>
-  var ALL_COUNCILLORS = [];
+  document.getElementById('yr').textContent = new Date().getFullYear();
 
   function esc(s) {
     if (!s) return '';
-    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+                    .replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+  }
+  function stamp(id, text) {
+    var el = document.getElementById(id);
+    if (el && text) el.textContent = 'Fetched: ' + text;
+  }
+  function loadJSON(file, cb) {
+    fetch('data/' + file + '?v=' + Date.now())
+      .then(function(r){ return r.json(); })
+      .then(cb)
+      .catch(function(e){ console.error('Failed to load ' + file, e); });
   }
 
   function switchPage(id, btn) {
-    document.querySelectorAll('.page-view').forEach(p => p.classList.remove('active-view'));
-    document.querySelectorAll('.tab-link').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.page-view').forEach(function(p){ p.classList.remove('active-view'); });
+    document.querySelectorAll('.tab-link').forEach(function(t){ t.classList.remove('active'); });
     document.getElementById(id).classList.add('active-view');
     if (btn) btn.classList.add('active');
+    window.scrollTo({top:0, behavior:'smooth'});
+  }
+
+  var ALL_COUNCILLORS = [];
+
+  function renderCouncillors(data) {
+    ALL_COUNCILLORS = data;
+    document.getElementById('cllr-count').textContent = data.length;
+
+    var wards = [...new Set(data.map(function(c){ return c.ward; }))].sort();
+    document.getElementById('ward-count').textContent = wards.length;
+
+    var sel = document.getElementById('ward-filter');
+    wards.forEach(function(w){
+      var opt = document.createElement('option');
+      opt.value = w; opt.textContent = w;
+      sel.appendChild(opt);
+    });
+
+    displayCouncillors(data);
   }
 
   function displayCouncillors(data) {
-    var container = document.getElementById('councillors-box');
     if (!data.length) {
-      container.innerHTML = '<div class="empty-state"><p>No matching members found.</p></div>';
+      document.getElementById('councillors-box').innerHTML =
+        '<div class="empty-state"><p>No councillors found matching your search.</p></div>';
       return;
     }
 
     var byWard = {};
-    data.forEach(c => {
+    data.forEach(function(c){
       if (!byWard[c.ward]) byWard[c.ward] = [];
       byWard[c.ward].push(c);
     });
 
     var html = '';
-    Object.keys(byWard).sort().forEach(ward => {
+    Object.keys(byWard).sort().forEach(function(ward){
       html += '<div class="ward-section"><div class="ward-title">📍 ' + esc(ward) + ' Ward</div><div class="cllr-grid">';
-      byWard[ward].forEach(c => {
+      byWard[ward].forEach(function(c){
         var photoUrl = c.photo || 'https://placehold.co/240x180/eee/999?text=Photo';
-        html += '<div class="cllr-card">' +
-          '<img class="cllr-photo" src="' + esc(photoUrl) + '" alt="' + esc(c.name) + '">' +
+        html +=
+          '<div class="cllr-card">' +
+          '<img class="cllr-photo" src="' + esc(photoUrl) + '" alt="' + esc(c.name) + '" loading="lazy" onerror="this.src=\'https://placehold.co/240x180/eee/999?text=No+Photo\'">' +
           '<div class="cllr-body">' +
           '<div class="cllr-name">Cllr ' + esc(c.name) + '</div>' +
-          '<div class="cllr-ward">' + esc(c.ward) + ' · Labour</div>' +
+          '<div class="cllr-ward">' + esc(c.ward) + ' Ward · Labour</div>' +
           
-          '<div class="cllr-role-container">' +
+          '<div style="display:flex; flex-direction:column; gap:4px; align-items:flex-start;">' +
             (c.role ? '<div class="cllr-role">🏛️ ' + esc(c.role) + '</div>' : '') +
             (c.committeeRole ? '<div class="cllr-committee-role">⚖️ ' + esc(c.committeeRole) + '</div>' : '') +
           '</div>' +
 
           '<div class="cllr-contact">' +
-            (c.phone ? '<div>📞 ' + esc(c.phone) + '</div>' : '') +
-            (c.email ? '<div>📧 <a href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a></div>' : '') +
+          (c.phone ? '<div>📞 <a href="tel:' + esc(c.phone.replace(/\s/g,'')) + '">' + esc(c.phone) + '</a></div>' : '') +
+          (c.email ? '<div>📧 <a href="mailto:' + esc(c.email) + '">' + esc(c.email) + '</a></div>' : '') +
           '</div>' +
-          '<a href="' + esc(c.profileUrl) + '" target="_blank" class="cllr-profile-link">View Council Profile →</a>' +
-        '</div></div>';
+          (c.surgery ? '<div style="font-size:0.78rem;color:#777;margin-top:8px;padding-top:8px;border-top:1px solid #F0F0F0;">🩺 ' + esc(c.surgery.substring(0,120)) + '</div>' : '') +
+          '<a href="' + esc(c.profileUrl) + '" target="_blank" class="cllr-profile-link">View council profile →</a>' +
+          '</div></div>';
       });
       html += '</div></div>';
     });
-    container.innerHTML = html;
+
+    document.getElementById('councillors-box').innerHTML = html;
   }
 
   function filterCouncillors() {
     var search = document.getElementById('cllr-search').value.toLowerCase();
-    var ward = document.getElementById('ward-filter').value;
-    var filtered = ALL_COUNCILLORS.filter(c => {
-      return (!search || c.name.toLowerCase().includes(search) || c.ward.toLowerCase().includes(search) || (c.role || '').toLowerCase().includes(search) || (c.committeeRole || '').toLowerCase().includes(search)) &&
-             (!ward || c.ward === ward);
+    var ward   = document.getElementById('ward-filter').value;
+    var filtered = ALL_COUNCILLORS.filter(function(c){
+      var matchSearch = !search ||
+        c.name.toLowerCase().includes(search) ||
+        c.ward.toLowerCase().includes(search) ||
+        (c.role || '').toLowerCase().includes(search) ||
+        (c.committeeRole || '').toLowerCase().includes(search);
+      var matchWard = !ward || c.ward === ward;
+      return matchSearch && matchWard;
     });
     displayCouncillors(filtered);
   }
 
-  function loadJSON(file, cb) {
-    fetch('data/' + file + '?v=' + Date.now()).then(r => r.json()).then(cb).catch(e => console.error(e));
+  function renderNews(data) {
+    stamp('ts-news', data.length ? data[0].fetchedAt : '');
+    if (!data.length) {
+      document.getElementById('news-box').innerHTML = '<p style="color:#777;">No news available.</p>';
+      return;
+    }
+    document.getElementById('news-box').innerHTML = data.map(function(n){
+      return '<div class="news-item' + (n.focused ? ' featured' : '') + '">' +
+        '<div style="flex:1;min-width:0;">' +
+          '<h4>' + esc(n.title) + '</h4>' +
+          (n.summary ? '<p class="news-summary">' + esc(n.summary) + '</p>' : '') +
+          '<div class="news-meta">📅 ' + esc(n.date) + '</div>' +
+        '</div>' +
+        '<a href="' + esc(n.link) + '" target="_blank" class="read-link">Read full article →</a>' +
+        '</div>';
+    }).join('');
   }
 
-  loadJSON('meta.json', d => { document.getElementById('sync-timestamp').textContent = 'Last sync: ' + d.lastUpdated; });
-  loadJSON('councillors.json', data => {
-    ALL_COUNCILLORS = data;
-    document.getElementById('cllr-count').textContent = data.length;
-    var wards = [...new Set(data.map(c => c.ward))].sort();
-    document.getElementById('ward-count').textContent = wards.length;
-    var sel = document.getElementById('ward-filter');
-    wards.forEach(w => { var o = document.createElement('option'); o.value = w; o.textContent = w; sel.appendChild(o); });
-    displayCouncillors(data);
+  function renderPolice(data) {
+    stamp('ts-police', data.length ? data[0].fetchedAt : '');
+    if (!data.length) {
+      document.getElementById('police-box').innerHTML = '<div class="empty-state">No data available</div>';
+      return;
+    }
+    document.getElementById('police-box').innerHTML = data.map(function(p){
+      return '<div class="police-card">' +
+        '<span class="nb">' + esc(p.neighbourhood) + '</span>' +
+        '<h4>' + esc(p.title) + '</h4>' +
+        '<p>' + esc(p.action || p.issue) + '</p>' +
+        '</div>';
+    }).join('');
+  }
+
+  loadJSON('meta.json', function(d){
+    document.getElementById('sync-timestamp').textContent = 'Councillor data last updated: ' + d.lastUpdated;
   });
-  loadJSON('news.json', d => {
-    document.getElementById('ts-news').textContent = d.length ? d[0].fetchedAt : '';
-    document.getElementById('news-box').innerHTML = d.map(n => '<div class="news-item"><div><h4>' + esc(n.title) + '</h4><p class="news-summary">' + esc(n.summary) + '</p></div><a href="' + esc(n.link) + '" target="_blank" class="read-link">Read →</a></div>').join('');
-  });
-  loadJSON('police.json', d => {
-    document.getElementById('ts-police').textContent = d.length ? d[0].fetchedAt : '';
-    document.getElementById('police-box').innerHTML = d.map(p => '<div class="police-card"><span class="nb">' + esc(p.neighbourhood) + '</span><h4>' + esc(p.title) + '</h4><p>' + esc(p.issue) + '</p></div>').join('');
-  });
+  loadJSON('councillors.json', renderCouncillors);
+  loadJSON('news.json',        renderNews);
+  loadJSON('police.json',      renderPolice);
 </script>
 </body>
 </html>
