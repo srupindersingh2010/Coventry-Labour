@@ -1,13 +1,33 @@
 [
   {
-    "title": "Free summer holiday activities and meals for Coventry children",
-    "summary": "Coventry City Council is encouraging parents and carers to check if their children are eligible for FREE holiday activities and nutritious hot meals through the Holiday Activities and Food  programme.",
-    "link": "https://www.coventry.gov.uk/news/article/5517/free-summer-holiday-activities-and-meals-for-coventry-children",
+    "title": "Major city-wide collaboration to drive new era for arts and culture in Coventry",
+    "summary": "Working in partnership with Coventry University, Coventry City Council is pleased to be involved in the delivery of a major new initiative - Shape Coventry.",
+    "link": "https://www.coventry.gov.uk/news/article/5519/major-city-wide-collaboration-to-drive-new-era-for-arts-and-culture-in-coventry",
     "date": "Recent",
     "focused": true,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "16 June 2026 at 20:57"
+    "fetchedAt": "17 June 2026 at 18:51"
+  },
+  {
+    "title": "City to unite to thank Armed Forces",
+    "summary": "Armed Forces Day will be held later this month, with Coventry residents invited to join the country’s tribute at a parade and service in the city.",
+    "link": "https://www.coventry.gov.uk/news/article/5518/city-to-unite-to-thank-armed-forces",
+    "date": "Recent",
+    "focused": false,
+    "source": "coventry.gov.uk/news",
+    "sourceUrl": "https://www.coventry.gov.uk/news",
+    "fetchedAt": "17 June 2026 at 18:51"
+  },
+  {
+    "title": "Free summer holiday activities and meals for Coventry children",
+    "summary": "Coventry City Council is encouraging parents and carers to check if their children are eligible for FREE holiday activities and nutritious hot meals through the Holiday Activities and Food  programme.",
+    "link": "https://www.coventry.gov.uk/news/article/5517/free-summer-holiday-activities-and-meals-for-coventry-children",
+    "date": "Recent",
+    "focused": false,
+    "source": "coventry.gov.uk/news",
+    "sourceUrl": "https://www.coventry.gov.uk/news",
+    "fetchedAt": "17 June 2026 at 18:51"
   },
   {
     "title": "Coventry City Football Club to be awarded the Honorary Freedom of the City",
@@ -17,7 +37,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "16 June 2026 at 20:57"
+    "fetchedAt": "17 June 2026 at 18:51"
   },
   {
     "title": "City to stage first ever Windrush Festival",
@@ -27,7 +47,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "16 June 2026 at 20:57"
+    "fetchedAt": "17 June 2026 at 18:51"
   },
   {
     "title": "Ambitious plan to transform support for Coventry children with special educational needs",
@@ -37,7 +57,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "16 June 2026 at 20:57"
+    "fetchedAt": "17 June 2026 at 18:51"
   },
   {
     "title": "City Centre shop closed that persistently sold illegal tobacco, vapes, and dangerous toys",
@@ -47,7 +67,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "16 June 2026 at 20:57"
+    "fetchedAt": "17 June 2026 at 18:51"
   },
   {
     "title": "Bands in the Park returns to Coventry this summer with free family concerts",
@@ -57,26 +77,6 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "16 June 2026 at 20:57"
-  },
-  {
-    "title": "Good news for adult social care in Coventry",
-    "summary": "Following an announcement today the Care Quality Commission (CQC) has rated the Council’s Adult Social Care Services as good.",
-    "link": "https://www.coventry.gov.uk/news/article/5510/good-news-for-adult-social-care-in-coventry",
-    "date": "Recent",
-    "focused": false,
-    "source": "coventry.gov.uk/news",
-    "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "16 June 2026 at 20:57"
-  },
-  {
-    "title": "Three arrested from High Street stores in Coventry operation",
-    "summary": "We’re taking tough action against High Street stores which are funding organised crime through sales of illicit goods and fuelling anti-social behaviour and violence.",
-    "link": "https://www.coventry.gov.uk/news/article/5509/three-arrested-from-high-street-stores-in-coventry-operation",
-    "date": "Recent",
-    "focused": false,
-    "source": "coventry.gov.uk/news",
-    "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "16 June 2026 at 20:57"
+    "fetchedAt": "17 June 2026 at 18:51"
   }
 ]
