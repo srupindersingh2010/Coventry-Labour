@@ -1,13 +1,23 @@
 [
   {
-    "title": "Major city-wide collaboration to drive new era for arts and culture in Coventry",
-    "summary": "Working in partnership with Coventry University, Coventry City Council is pleased to be involved in the delivery of a major new initiative - Shape Coventry.",
-    "link": "https://www.coventry.gov.uk/news/article/5519/major-city-wide-collaboration-to-drive-new-era-for-arts-and-culture-in-coventry",
+    "title": "Homegrown talent and national stars come together for Godiva in the City",
+    "summary": "David Rodigan, The Selecter and Chip are set to headline this year's Godiva in the City event, with tickets set to be available from 10am on Tuesday 23 June.",
+    "link": "https://www.coventry.gov.uk/news/article/5520/homegrown-talent-and-national-stars-come-together-for-godiva-in-the-city",
     "date": "Recent",
     "focused": true,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "21 June 2026 at 14:25"
+    "fetchedAt": "22 June 2026 at 20:55"
+  },
+  {
+    "title": "Major city-wide collaboration to drive new era for arts and culture in Coventry",
+    "summary": "Working in partnership with Coventry University, Coventry City Council is pleased to be involved in the delivery of a major new initiative - Shape Coventry.",
+    "link": "https://www.coventry.gov.uk/news/article/5519/major-city-wide-collaboration-to-drive-new-era-for-arts-and-culture-in-coventry",
+    "date": "Recent",
+    "focused": false,
+    "source": "coventry.gov.uk/news",
+    "sourceUrl": "https://www.coventry.gov.uk/news",
+    "fetchedAt": "22 June 2026 at 20:55"
   },
   {
     "title": "City to unite to thank Armed Forces",
@@ -17,7 +27,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "21 June 2026 at 14:25"
+    "fetchedAt": "22 June 2026 at 20:55"
   },
   {
     "title": "Free summer holiday activities and meals for Coventry children",
@@ -27,7 +37,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "21 June 2026 at 14:25"
+    "fetchedAt": "22 June 2026 at 20:55"
   },
   {
     "title": "Coventry City Football Club to be awarded the Honorary Freedom of the City",
@@ -37,7 +47,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "21 June 2026 at 14:25"
+    "fetchedAt": "22 June 2026 at 20:55"
   },
   {
     "title": "City to stage first ever Windrush Festival",
@@ -47,7 +57,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "21 June 2026 at 14:25"
+    "fetchedAt": "22 June 2026 at 20:55"
   },
   {
     "title": "Ambitious plan to transform support for Coventry children with special educational needs",
@@ -57,7 +67,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "21 June 2026 at 14:25"
+    "fetchedAt": "22 June 2026 at 20:55"
   },
   {
     "title": "City Centre shop closed that persistently sold illegal tobacco, vapes, and dangerous toys",
@@ -67,16 +77,6 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "21 June 2026 at 14:25"
-  },
-  {
-    "title": "Bands in the Park returns to Coventry this summer with free family concerts",
-    "summary": "Coventry City Council’s popular Bands in the Park series returns next month, bringing eight free live music performances to the city’s green spaces throughout the summer.",
-    "link": "https://www.coventry.gov.uk/news/article/5512/bands-in-the-park-returns-to-coventry-this-summer-with-free-family-concerts",
-    "date": "Recent",
-    "focused": false,
-    "source": "coventry.gov.uk/news",
-    "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "21 June 2026 at 14:25"
+    "fetchedAt": "22 June 2026 at 20:55"
   }
 ]
