@@ -1,13 +1,23 @@
 [
   {
-    "title": "Homegrown talent and national stars come together for Godiva in the City",
-    "summary": "David Rodigan, The Selecter and Chip are set to headline this year's Godiva in the City event, with tickets set to be available from 10am on Tuesday 23 June.",
-    "link": "https://www.coventry.gov.uk/news/article/5520/homegrown-talent-and-national-stars-come-together-for-godiva-in-the-city",
+    "title": "Coventry Launches “Best Start in Life” Strategy to Improve Outcomes for Children and Families",
+    "summary": "Coventry City Council, in partnership with key local organisations, is proud to announce the launch of its “Best Start in Life” Strategy.",
+    "link": "https://www.coventry.gov.uk/news/article/5521/coventry-launches-best-start-in-life-strategy-to-improve-outcomes-for-children-and-families",
     "date": "Recent",
     "focused": true,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "22 June 2026 at 20:55"
+    "fetchedAt": "23 June 2026 at 11:32"
+  },
+  {
+    "title": "Homegrown talent and national stars come together for Godiva in the City",
+    "summary": "David Rodigan, The Selecter and Chip are set to headline this year's Godiva in the City event, with tickets set to be available from 10am on Tuesday 23 June.",
+    "link": "https://www.coventry.gov.uk/news/article/5520/homegrown-talent-and-national-stars-come-together-for-godiva-in-the-city",
+    "date": "Recent",
+    "focused": false,
+    "source": "coventry.gov.uk/news",
+    "sourceUrl": "https://www.coventry.gov.uk/news",
+    "fetchedAt": "23 June 2026 at 11:32"
   },
   {
     "title": "Major city-wide collaboration to drive new era for arts and culture in Coventry",
@@ -17,7 +27,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "22 June 2026 at 20:55"
+    "fetchedAt": "23 June 2026 at 11:32"
   },
   {
     "title": "City to unite to thank Armed Forces",
@@ -27,7 +37,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "22 June 2026 at 20:55"
+    "fetchedAt": "23 June 2026 at 11:32"
   },
   {
     "title": "Free summer holiday activities and meals for Coventry children",
@@ -37,7 +47,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "22 June 2026 at 20:55"
+    "fetchedAt": "23 June 2026 at 11:32"
   },
   {
     "title": "Coventry City Football Club to be awarded the Honorary Freedom of the City",
@@ -47,7 +57,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "22 June 2026 at 20:55"
+    "fetchedAt": "23 June 2026 at 11:32"
   },
   {
     "title": "City to stage first ever Windrush Festival",
@@ -57,7 +67,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "22 June 2026 at 20:55"
+    "fetchedAt": "23 June 2026 at 11:32"
   },
   {
     "title": "Ambitious plan to transform support for Coventry children with special educational needs",
@@ -67,16 +77,6 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "22 June 2026 at 20:55"
-  },
-  {
-    "title": "City Centre shop closed that persistently sold illegal tobacco, vapes, and dangerous toys",
-    "summary": "Spon Mini Market, located on Spon Street within the Coventry City Centre, has been ordered to close for persistently selling illegal tobacco, vapes, and dangerous toys.",
-    "link": "https://www.coventry.gov.uk/news/article/5513/city-centre-shop-closed-that-persistently-sold-illegal-tobacco-vapes-and-dangerous-toys",
-    "date": "Recent",
-    "focused": false,
-    "source": "coventry.gov.uk/news",
-    "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "22 June 2026 at 20:55"
+    "fetchedAt": "23 June 2026 at 11:32"
   }
 ]
