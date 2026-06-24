@@ -1,13 +1,23 @@
 [
   {
-    "title": "Coventry Launches “Best Start in Life” Strategy to Improve Outcomes for Children and Families",
-    "summary": "Coventry City Council, in partnership with key local organisations, is proud to announce the launch of its “Best Start in Life” Strategy.",
-    "link": "https://www.coventry.gov.uk/news/article/5521/coventry-launches-best-start-in-life-strategy-to-improve-outcomes-for-children-and-families",
+    "title": "Victorious Sky Blues awarded Honorary Freedom of the City",
+    "summary": "Coventry City FC has been awarded the Honorary Freedom of the City in recognition of its promotion back to the Premier League and outstanding contribution to the life of the city.",
+    "link": "https://www.coventry.gov.uk/news/article/5523/victorious-sky-blues-awarded-honorary-freedom-of-the-city",
     "date": "Recent",
     "focused": true,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "23 June 2026 at 11:32"
+    "fetchedAt": "24 June 2026 at 11:16"
+  },
+  {
+    "title": "Coventry Launches “Best Start in Life” Strategy to Improve Outcomes for Children and Families",
+    "summary": "Coventry City Council, in partnership with key local organisations, is proud to announce the launch of its “Best Start in Life” Strategy.",
+    "link": "https://www.coventry.gov.uk/news/article/5521/coventry-launches-best-start-in-life-strategy-to-improve-outcomes-for-children-and-families",
+    "date": "Recent",
+    "focused": false,
+    "source": "coventry.gov.uk/news",
+    "sourceUrl": "https://www.coventry.gov.uk/news",
+    "fetchedAt": "24 June 2026 at 11:16"
   },
   {
     "title": "Homegrown talent and national stars come together for Godiva in the City",
@@ -17,7 +27,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "23 June 2026 at 11:32"
+    "fetchedAt": "24 June 2026 at 11:16"
   },
   {
     "title": "Major city-wide collaboration to drive new era for arts and culture in Coventry",
@@ -27,7 +37,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "23 June 2026 at 11:32"
+    "fetchedAt": "24 June 2026 at 11:16"
   },
   {
     "title": "City to unite to thank Armed Forces",
@@ -37,7 +47,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "23 June 2026 at 11:32"
+    "fetchedAt": "24 June 2026 at 11:16"
   },
   {
     "title": "Free summer holiday activities and meals for Coventry children",
@@ -47,7 +57,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "23 June 2026 at 11:32"
+    "fetchedAt": "24 June 2026 at 11:16"
   },
   {
     "title": "Coventry City Football Club to be awarded the Honorary Freedom of the City",
@@ -57,7 +67,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "23 June 2026 at 11:32"
+    "fetchedAt": "24 June 2026 at 11:16"
   },
   {
     "title": "City to stage first ever Windrush Festival",
@@ -67,16 +77,6 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "23 June 2026 at 11:32"
-  },
-  {
-    "title": "Ambitious plan to transform support for Coventry children with special educational needs",
-    "summary": "Coventry City Council has published plans to transform how children and young people with special educational needs and disabilities (SEND) are supported across the city.",
-    "link": "https://www.coventry.gov.uk/news/article/5514/ambitious-plan-to-transform-support-for-coventry-children-with-special-educational-needs",
-    "date": "Recent",
-    "focused": false,
-    "source": "coventry.gov.uk/news",
-    "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "23 June 2026 at 11:32"
+    "fetchedAt": "24 June 2026 at 11:16"
   }
 ]
