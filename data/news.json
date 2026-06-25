@@ -1,13 +1,23 @@
 [
   {
-    "title": "Victorious Sky Blues awarded Honorary Freedom of the City",
-    "summary": "Coventry City FC has been awarded the Honorary Freedom of the City in recognition of its promotion back to the Premier League and outstanding contribution to the life of the city.",
-    "link": "https://www.coventry.gov.uk/news/article/5523/victorious-sky-blues-awarded-honorary-freedom-of-the-city",
+    "title": "Barry named Coventry’s latest Good Citizen",
+    "summary": "Barry Price has been honoured with Coventry’s Good Citizen Award for his incredible fundraising efforts for local charities.",
+    "link": "https://www.coventry.gov.uk/news/article/5524/barry-named-coventry-s-latest-good-citizen",
     "date": "Recent",
     "focused": true,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "24 June 2026 at 11:16"
+    "fetchedAt": "25 June 2026 at 11:12"
+  },
+  {
+    "title": "Victorious Sky Blues awarded Honorary Freedom of the City",
+    "summary": "Coventry City FC has been awarded the Honorary Freedom of the City in recognition of its promotion back to the Premier League and outstanding contribution to the life of the city.",
+    "link": "https://www.coventry.gov.uk/news/article/5523/victorious-sky-blues-awarded-honorary-freedom-of-the-city",
+    "date": "Recent",
+    "focused": false,
+    "source": "coventry.gov.uk/news",
+    "sourceUrl": "https://www.coventry.gov.uk/news",
+    "fetchedAt": "25 June 2026 at 11:12"
   },
   {
     "title": "Coventry Launches “Best Start in Life” Strategy to Improve Outcomes for Children and Families",
@@ -17,7 +27,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "24 June 2026 at 11:16"
+    "fetchedAt": "25 June 2026 at 11:12"
   },
   {
     "title": "Homegrown talent and national stars come together for Godiva in the City",
@@ -27,7 +37,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "24 June 2026 at 11:16"
+    "fetchedAt": "25 June 2026 at 11:12"
   },
   {
     "title": "Major city-wide collaboration to drive new era for arts and culture in Coventry",
@@ -37,7 +47,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "24 June 2026 at 11:16"
+    "fetchedAt": "25 June 2026 at 11:12"
   },
   {
     "title": "City to unite to thank Armed Forces",
@@ -47,7 +57,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "24 June 2026 at 11:16"
+    "fetchedAt": "25 June 2026 at 11:12"
   },
   {
     "title": "Free summer holiday activities and meals for Coventry children",
@@ -57,7 +67,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "24 June 2026 at 11:16"
+    "fetchedAt": "25 June 2026 at 11:12"
   },
   {
     "title": "Coventry City Football Club to be awarded the Honorary Freedom of the City",
@@ -67,16 +77,6 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "24 June 2026 at 11:16"
-  },
-  {
-    "title": "City to stage first ever Windrush Festival",
-    "summary": "Coventry is to stage its first Windrush Festival, with five days of events and activities to celebrate the anniversary and pay tribute to those who travelled to build new lives and a new city.",
-    "link": "https://www.coventry.gov.uk/news/article/5515/city-to-stage-first-ever-windrush-festival",
-    "date": "Recent",
-    "focused": false,
-    "source": "coventry.gov.uk/news",
-    "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "24 June 2026 at 11:16"
+    "fetchedAt": "25 June 2026 at 11:12"
   }
 ]
