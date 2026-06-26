@@ -1,13 +1,23 @@
 [
   {
-    "title": "Barry named Coventry’s latest Good Citizen",
-    "summary": "Barry Price has been honoured with Coventry’s Good Citizen Award for his incredible fundraising efforts for local charities.",
-    "link": "https://www.coventry.gov.uk/news/article/5524/barry-named-coventry-s-latest-good-citizen",
+    "title": "Joint inspections crackdown on illegal HMOs",
+    "summary": "Coventry City Council’s Safer Housing and Communities team, along with partners, have carried out a series of targeted enforcement visits across the city.",
+    "link": "https://www.coventry.gov.uk/news/article/5525/joint-inspections-crackdown-on-illegal-hmos",
     "date": "Recent",
     "focused": true,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "25 June 2026 at 11:12"
+    "fetchedAt": "26 June 2026 at 11:18"
+  },
+  {
+    "title": "Barry named Coventry’s latest Good Citizen",
+    "summary": "Barry Price has been honoured with Coventry’s Good Citizen Award for his incredible fundraising efforts for local charities.",
+    "link": "https://www.coventry.gov.uk/news/article/5524/barry-named-coventry-s-latest-good-citizen",
+    "date": "Recent",
+    "focused": false,
+    "source": "coventry.gov.uk/news",
+    "sourceUrl": "https://www.coventry.gov.uk/news",
+    "fetchedAt": "26 June 2026 at 11:18"
   },
   {
     "title": "Victorious Sky Blues awarded Honorary Freedom of the City",
@@ -17,7 +27,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "25 June 2026 at 11:12"
+    "fetchedAt": "26 June 2026 at 11:18"
   },
   {
     "title": "Coventry Launches “Best Start in Life” Strategy to Improve Outcomes for Children and Families",
@@ -27,7 +37,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "25 June 2026 at 11:12"
+    "fetchedAt": "26 June 2026 at 11:18"
   },
   {
     "title": "Homegrown talent and national stars come together for Godiva in the City",
@@ -37,7 +47,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "25 June 2026 at 11:12"
+    "fetchedAt": "26 June 2026 at 11:18"
   },
   {
     "title": "Major city-wide collaboration to drive new era for arts and culture in Coventry",
@@ -47,7 +57,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "25 June 2026 at 11:12"
+    "fetchedAt": "26 June 2026 at 11:18"
   },
   {
     "title": "City to unite to thank Armed Forces",
@@ -57,7 +67,7 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "25 June 2026 at 11:12"
+    "fetchedAt": "26 June 2026 at 11:18"
   },
   {
     "title": "Free summer holiday activities and meals for Coventry children",
@@ -67,16 +77,6 @@
     "focused": false,
     "source": "coventry.gov.uk/news",
     "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "25 June 2026 at 11:12"
-  },
-  {
-    "title": "Coventry City Football Club to be awarded the Honorary Freedom of the City",
-    "summary": "Coventry City Council has called an Extraordinary General Meeting (EGM) at which councillors will be asked to award the Sky Blues the Honorary Freedom of the City.",
-    "link": "https://www.coventry.gov.uk/news/article/5516/coventry-city-football-club-to-be-awarded-the-honorary-freedom-of-the-city",
-    "date": "Recent",
-    "focused": false,
-    "source": "coventry.gov.uk/news",
-    "sourceUrl": "https://www.coventry.gov.uk/news",
-    "fetchedAt": "25 June 2026 at 11:12"
+    "fetchedAt": "26 June 2026 at 11:18"
   }
 ]
