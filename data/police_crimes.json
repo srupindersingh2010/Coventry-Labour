@@ -1,0 +1,42 @@
+[
+  {
+    "title": "Violence and Sexual Offences",
+    "issue": "161 reported (Apr 2026)",
+    "count": "161",
+    "action": "Targeted policing operations and victim support services in place.",
+    "status": "Active Priority",
+    "source": "westmidlands.police.uk",
+    "sourceUrl": "https://www.westmidlands.police.uk/area/your-area/west-midlands/coventry/stoke-and-wyken/meetings-and-events/top-reported-crimes-in-this-area",
+    "fetchedAt": "29 June 2026 at 12:39"
+  },
+  {
+    "title": "Shoplifting",
+    "issue": "45 reported (Apr 2026)",
+    "count": "45",
+    "action": "High-visibility patrols at retail locations including Binley Road.",
+    "status": "Active Priority",
+    "source": "westmidlands.police.uk",
+    "sourceUrl": "https://www.westmidlands.police.uk/area/your-area/west-midlands/coventry/stoke-and-wyken/meetings-and-events/top-reported-crimes-in-this-area",
+    "fetchedAt": "29 June 2026 at 12:39"
+  },
+  {
+    "title": "Criminal Damage and Arson",
+    "issue": "41 reported (Apr 2026)",
+    "count": "41",
+    "action": "Increased patrols in hotspot areas.",
+    "status": "Active Priority",
+    "source": "westmidlands.police.uk",
+    "sourceUrl": "https://www.westmidlands.police.uk/area/your-area/west-midlands/coventry/stoke-and-wyken/meetings-and-events/top-reported-crimes-in-this-area",
+    "fetchedAt": "29 June 2026 at 12:39"
+  },
+  {
+    "title": "Other Theft",
+    "issue": "33 reported (Apr 2026)",
+    "count": "33",
+    "action": "Intelligence-led operations targeting repeat offenders.",
+    "status": "Active Priority",
+    "source": "westmidlands.police.uk",
+    "sourceUrl": "https://www.westmidlands.police.uk/area/your-area/west-midlands/coventry/stoke-and-wyken/meetings-and-events/top-reported-crimes-in-this-area",
+    "fetchedAt": "29 June 2026 at 12:39"
+  }
+]
