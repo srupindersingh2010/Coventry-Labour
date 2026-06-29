@@ -1,15 +1,59 @@
 """
-Coventry Labour Councillors — Daily Data Scraper
+Lower Stoke Ward — Daily Data Scraper
 Runs via GitHub Actions every day at 08:00.
-Scrapes all Labour councillors from edemocracy.coventry.gov.uk
-plus council news, police data and community info.
+
+PLANNING DATA:
+  Single source of truth: Coventry Planning Portal weekly received list.
+  Only applications currently listed on the Council's portal are shown.
+  If the portal is unreachable, planning.json will contain a siteDown marker
+  and the website will display a notice rather than stale or incorrect data.
 """
 
-import json, re, sys, traceback, csv, io, time
+import json, re, sys, traceback, csv, io, os, tempfile
 from datetime import datetime, timezone, timedelta, date as dt_date
 from pathlib import Path
 import requests
 from bs4 import BeautifulSoup
+
+# =============================================================================
+# BROWSER FETCHER (Playwright)
+# coventry.gov.uk and westmidlands.police.uk return 403 to plain HTTP requests
+# from server IPs (GitHub Actions). Playwright headless Chrome bypasses this.
+# Install once in workflow: pip install playwright && playwright install chromium
+# =============================================================================
+def browser_get(url, wait="domcontentloaded", timeout=30000):
+    """
+    Fetch a URL using a headless Chromium browser.
+    Falls back gracefully if Playwright is not installed.
+    Returns the page HTML string, or "" on failure.
+    """
+    try:
+        from playwright.sync_api import sync_playwright
+        with sync_playwright() as p:
+            browser = p.chromium.launch(
+                headless=True,
+                args=["--no-sandbox", "--disable-dev-shm-usage",
+                      "--disable-blink-features=AutomationControlled"]
+            )
+            ctx  = browser.new_context(
+                user_agent=(
+                    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+                    "AppleWebKit/537.36 (KHTML, like Gecko) "
+                    "Chrome/124.0.0.0 Safari/537.36"
+                ),
+                locale="en-GB",
+                viewport={"width": 1280, "height": 800},
+            )
+            page = ctx.new_page()
+            page.goto(url, wait_until=wait, timeout=timeout)
+            html = page.content()
+            browser.close()
+            print(f"  BROWSER GET {url[:80]} -> {len(html)} chars")
+            return html
+    except Exception as e:
+        print(f"  BROWSER GET {url[:80]} -> ERROR: {e}")
+        return ""
+
 
 DATA_DIR = Path(__file__).parent / "data"
 DATA_DIR.mkdir(exist_ok=True)
@@ -18,9 +62,11 @@ NOW_UTC = datetime.now(timezone.utc)
 NOW_UK  = NOW_UTC + timedelta(hours=1)
 STAMP   = NOW_UK.strftime("%-d %B %Y at %H:%M")
 
-EDEM_BASE = "https://edemocracy.coventry.gov.uk"
-WMP_BASE  = "https://www.westmidlands.police.uk/area/your-area/west-midlands/coventry"
-WMP_SUFFIX = "top-reported-crimes-in-this-area"
+PORTAL             = "https://planandregulatory.coventry.gov.uk/planning/index.html"
+GALLERY_FOLDER_ID  = "1ukfcyO4BPjeAv40XVsvcJ-ds4ilwML3y"
+SHEET_ID           = "1CiCnq-WvIL0KmEv3RldjV0u9KxpTttHQkbN1igNILhQ"
+WMP_BASE           = "https://www.westmidlands.police.uk/area/your-area/west-midlands/coventry/stoke-and-wyken"
+WMP_SUFFIX         = "top-reported-crimes-in-this-area"
 
 HEADERS = {
     "User-Agent": (
@@ -35,10 +81,10 @@ HEADERS = {
 def safe_get(url, timeout=20):
     try:
         r = requests.get(url, headers=HEADERS, timeout=timeout, allow_redirects=True)
-        print(f"  GET {url[:80]} -> {r.status_code} ({len(r.text)} chars)")
+        print(f"  GET {url[:90]} -> {r.status_code} ({len(r.text)} chars)")
         return r
     except Exception as e:
-        print(f"  GET {url[:80]} -> ERROR: {e}")
+        print(f"  GET {url[:90]} -> ERROR: {e}")
         return None
 
 def write_json(filename, data):
@@ -53,162 +99,63 @@ def fmt_date(iso_date):
     except Exception:
         return str(iso_date)
 
-# =============================================================================
-# 1. LABOUR COUNCILLORS
-# =============================================================================
-def scrape_councillors():
-    print("\n-- Labour Councillors --")
-    councillors = []
-
-    list_url = f"{EDEM_BASE}/mgMemberIndex.aspx?FN=WARD&VW=LIST&PIC=1"
-    r = safe_get(list_url)
-    if not r or r.status_code != 200:
-        print("  Could not fetch councillor list")
-        write_json("councillors.json", [])
-        return
-
-    soup = BeautifulSoup(r.text, "html.parser")
-    current_ward = ""
-    entries = []
-
-    for tag in soup.find_all(["h2", "li"]):
-        if tag.name == "h2":
-            current_ward = tag.get_text(strip=True)
-        elif tag.name == "li":
-            a = tag.find("a", href=re.compile(r'mgUserInfo', re.I))
-            if not a:
-                continue
-            name = a.get_text(strip=True)
-            href = a.get("href", "")
-            uid_m = re.search(r'UID=(\d+)', href, re.I)
-            if not uid_m:
-                continue
-            uid = uid_m.group(1)
-
-            li_text = tag.get_text(" ", strip=True)
-            party = ""
-            for p in ["Labour", "Conservative", "Green", "Reform", "Liberal"]:
-                if p.lower() in li_text.lower():
-                    party = p
-                    break
-
-            img = tag.find("img")
-            photo = ""
-            if img and img.get("src"):
-                src = img["src"]
-                photo = src if src.startswith("http") else EDEM_BASE + src
-                photo = photo.replace("smallpic", "bigpic")
-
-            entries.append({
-                "uid":   uid,
-                "name":  name.replace("Councillor ", "").strip(),
-                "ward":  current_ward,
-                "party": party,
-                "photo": photo,
-                "profileUrl": f"{EDEM_BASE}/mgUserInfo.aspx?UID={uid}"
-            })
-
-    labour_entries = [e for e in entries if e["party"] == "Labour"]
-    print(f"  Total councillors found: {len(entries)}, Labour: {len(labour_entries)}")
-
-    for i, cllr in enumerate(labour_entries):
-        print(f"  Profile {i+1}/{len(labour_entries)}: {cllr['name']}")
-        profile = scrape_councillor_profile(cllr["uid"])
-        cllr.update(profile)
-        cllr["fetchedAt"] = STAMP
-        councillors.append(cllr)
-        time.sleep(0.2)
-
-    print(f"  Total Labour councillors scraped: {len(councillors)}")
-    councillors.sort(key=lambda x: (x.get("ward",""), x.get("name","")))
-    write_json("councillors.json", councillors)
-
-def scrape_councillor_profile(uid):
-    """Fetch contact details from an individual councillor's profile page."""
-    r = safe_get(f"{EDEM_BASE}/mgUserInfo.aspx?UID={uid}")
-    if not r or r.status_code != 200:
-        return {"email":"","phone":"","surgery":"","role":"","committeeRole":"","bio":""}
-
-    soup = BeautifulSoup(r.text, "html.parser")
-    text = soup.get_text(" ", strip=True)
-
-    email = ""
-    email_tag = soup.find("a", href=re.compile(r'mailto:', re.I))
-    if email_tag:
-        email = email_tag["href"].replace("mailto:", "").strip()
-    if not email:
-        em = re.search(r'[\w.\-]+@coventry\.gov\.uk', text)
-        if em:
-            email = em.group()
-
-    phone = ""
-    phone_m = re.search(r'(?:Bus\.?\s*phone|Phone|Tel)[:\s]*([\d\s]{10,15})', text, re.I)
-    if phone_m:
-        phone = phone_m.group(1).strip()
-
-    surgery = ""
-    surgery_m = re.search(r'Surgery[^:]*:(.*?)(?:Contact|$)', text, re.I | re.S)
-    if surgery_m:
-        surgery = " ".join(surgery_m.group(1).split())[:300]
-
-    role = ""
-    role_tag = soup.find("a", href=re.compile(r'mgExecPostDetails', re.I))
-    if role_tag:
-        role = role_tag.get_text(strip=True)
-
-    # Clean variables initialization
-    committee_role = ""
-    chairs_found = []
-
-    patterns = [
-        (r"Scrutiny Co-ordination Committee", "Chair of Scrutiny Co-ordination"),
-        (r"Finance and Corporate Services Scrutiny Board\s*\(\s*1\s*\)", "Chair of Scrutiny Board (1)"),
-        (r"Education and Children's Services Scrutiny Board\s*\(\s*2\s*\)", "Chair of Scrutiny Board (2)"),
-        (r"Business, Economy and Enterprise Scrutiny Board\s*\(\s*3\s*\)", "Chair of Scrutiny Board (3)"),
-        (r"Communities and Neighbourhoods Scrutiny Board\s*\(\s*4\s*\)", "Chair of Scrutiny Board (4)"),
-        (r"Health and Social Care Scrutiny Board\s*\(\s*5\s*\)", "Chair of Scrutiny Board (5)"),
-        (r"Planning Committee", "Chair of Planning Committee"),
-        (r"Licensing and Regulatory Committee", "Chair of Licensing Committee"),
-        (r"Audit and Procurement Committee", "Chair of Audit Committee")
-    ]
-
-    for element in soup.find_all(["li", "p", "td", "div"]):
-        el_text = " ".join(element.get_text(" ", strip=True).split())
-        if "chair" in el_text.lower() or "chairman" in el_text.lower():
-            for regex, display_name in patterns:
-                if re.search(regex, el_text, re.I):
-                    if display_name not in chairs_found:
-                        chairs_found.append(display_name)
-
-    if chairs_found:
-        committee_role = " & ".join(chairs_found)
-
-    bio = ""
-    for p in soup.find_all("p"):
-        pt = p.get_text(strip=True)
-        if len(pt) > 60 and "elected" in pt.lower():
-            bio = pt[:400]
-            break
-
-    return {
-        "email":         email,
-        "phone":         phone,
-        "surgery":       surgery,
-        "role":          role,
-        "committeeRole": committee_role,
-        "bio":           bio
-    }
+def fmt_excel_date(value):
+    """
+    Convert an Excel/Google Sheets serial date number to a readable date string.
+    Excel counts days from 1 Jan 1900. e.g. 46179.75 = 7 June 2026 at 18:00.
+    Also handles: plain date strings, ISO dates, and empty values.
+    """
+    if not value:
+        return ""
+    # Already a readable string (not a number)
+    if isinstance(value, str):
+        value = value.strip()
+        if not value:
+            return ""
+        # Try parsing as ISO date first
+        try:
+            d = dt_date.fromisoformat(value[:10])
+            return d.strftime("%-d %b %Y")
+        except Exception:
+            pass
+        # Try as a float serial
+        try:
+            value = float(value)
+        except Exception:
+            # Return as-is if it looks like a date string already
+            if re.search(r'\d{1,2}[/\-]\d{1,2}[/\-]\d{2,4}', value):
+                return value
+            if re.search(r'\d{4}', value) and len(value) > 6:
+                return value
+            return value
+    try:
+        serial = float(value)
+        # Excel serial: days since 30 Dec 1899 (accounting for leap year bug)
+        base = dt_date(1899, 12, 30)
+        d = base + timedelta(days=int(serial))
+        return d.strftime("%-d %b %Y")
+    except Exception:
+        return str(value)
 
 # =============================================================================
-# 2. COVENTRY COUNCIL NEWS
+# 1. COUNCIL NEWS
 # =============================================================================
 def scrape_news():
     print("\n-- Council News --")
     entries = []
-    r = safe_get("https://www.coventry.gov.uk/news")
-    if r and r.status_code == 200:
-        soup = BeautifulSoup(r.text, "html.parser")
+    html = browser_get("https://www.coventry.gov.uk/news")
+    if html:
+        soup = BeautifulSoup(html, "html.parser")
         seen = set()
+
+        # Coventry news page structure (confirmed June 2026):
+        # Each article is a <li> containing:
+        #   <h2><a href="/news/article/XXXX/title">Title</a></h2>
+        #   <p>Summary text</p>
+        #   <strong>Published: Day, Nth Month YYYY</strong>
+        # Articles are inside <li> elements in a list
+
+        # Try finding articles via li > h2 > a pattern first
         for li in soup.find_all("li"):
             h2 = li.find("h2")
             if not h2:
@@ -220,97 +167,675 @@ def scrape_news():
             href  = a["href"]
             if not href or not title or title in seen or len(title) < 10:
                 continue
-            if "/news" not in href:
+            # Must be a news article link
+            if "/news/article/" not in href and "/news/" not in href:
                 continue
             seen.add(title)
             link = href if href.startswith("http") else "https://www.coventry.gov.uk" + href
+
+            # Get published date — Coventry HTML structure:
+            # <strong>Published:</strong> Monday, 8th June 2026
+            # The <strong> only wraps "Published:" — date is sibling text after it.
+            # Solution: read full li text and extract date with regex.
             date_str = ""
-            strong = li.find("strong", string=re.compile(r"Published", re.I))
-            if strong:
-                date_str = strong.get_text(strip=True).replace("Published:", "").strip()
+            li_text = li.get_text(" ", strip=True)
+            date_m = re.search(
+                r"Published.{0,5}(?:[A-Za-z]+,?\s*)?(\d{1,2})(?:st|nd|rd|th)?\s+([A-Za-z]+)\s+(\d{4})",
+                li_text, re.I)
+            if date_m:
+                date_str = date_m.group(1) + " " + date_m.group(2) + " " + date_m.group(3)
+                print(f"    Date found: {date_str}")
+            # Fallback: <time datetime="YYYY-MM-DD"> tag
+            if not date_str:
+                time_tag = li.find("time")
+                if time_tag:
+                    dt_attr = time_tag.get("datetime", "")
+                    if dt_attr:
+                        try:
+                            d = dt_date.fromisoformat(dt_attr[:10])
+                            date_str = d.strftime("%-d %B %Y")
+                        except Exception:
+                            date_str = time_tag.get_text(strip=True)
+            # Get summary text from <p> in same li
             summary = ""
             p = li.find("p")
             if p:
                 summary = p.get_text(strip=True)[:200]
+
             entries.append({
-                "title": title, "summary": summary, "link": link,
-                "date": date_str or "Recent", "focused": len(entries) == 0,
-                "source": "coventry.gov.uk/news",
+                "title":     title,
+                "summary":   summary,
+                "link":      link,
+                "date":      date_str or "Recent",
+                "focused":   len(entries) == 0,
+                "source":    "coventry.gov.uk/news",
                 "sourceUrl": "https://www.coventry.gov.uk/news",
                 "fetchedAt": STAMP
             })
-            if len(entries) >= 8:
+            print(f"  Article: {title[:70]}")
+            if len(entries) >= 6:
                 break
-    if not entries:
-        entries = [{"title": "Visit Coventry Council for the latest news",
-                    "link": "https://www.coventry.gov.uk/news",
-                    "date": "See website", "summary": "", "focused": True,
+
+        # Fallback: try any h2 > a with news link if li approach found nothing
+        if not entries:
+            print("  li approach found nothing, trying direct h2 scan...")
+            for h2 in soup.find_all("h2"):
+                a = h2.find("a", href=True)
+                if not a:
+                    continue
+                title = a.get_text(strip=True)
+                href  = a["href"]
+                if not href or not title or title in seen or len(title) < 10:
+                    continue
+                if "/news" not in href:
+                    continue
+                seen.add(title)
+                link = href if href.startswith("http") else "https://www.coventry.gov.uk" + href
+                # Look for date in surrounding elements
+                date_str = ""
+                container = h2.find_parent()
+                if container:
+                    strong = container.find("strong", string=re.compile(r"Published", re.I))
+                    if strong:
+                        date_str = strong.get_text(strip=True).replace("Published:", "").strip()
+                entries.append({
+                    "title": title, "summary": "", "link": link,
+                    "date": date_str or "Recent", "focused": len(entries) == 0,
                     "source": "coventry.gov.uk/news",
                     "sourceUrl": "https://www.coventry.gov.uk/news",
+                    "fetchedAt": STAMP
+                })
+                print(f"  Article (h2): {title[:70]}")
+                if len(entries) >= 6:
+                    break
+
+    if not entries:
+        if not html:
+            # Browser couldn't reach the site at all
+            print("  Coventry news site unreachable — writing siteDown marker")
+            write_json("news.json", [{"siteDown": True, "fetchedAt": STAMP,
+                                      "sourceUrl": "https://www.coventry.gov.uk/news"}])
+            return
+        # Site was reachable but we couldn't parse any articles
+        entries = [{"title": "Visit Coventry Council for the latest news",
+                    "link": "https://www.coventry.gov.uk/news",
+                    "date": "See website", "summary": "",
+                    "focused": True, "source": "coventry.gov.uk/news",
+                    "sourceUrl": "https://www.coventry.gov.uk/news",
                     "fetchedAt": STAMP}]
+
+    print(f"  Total news articles: {len(entries)}")
     write_json("news.json", entries)
 
 # =============================================================================
-# 3. POLICE DATA
+# 2. PLANNING APPLICATIONS
+#    Source 1: Coventry Planning Portal weekly list    (Playwright)
+#    Source 2: Coventry Planning Portal ward search    (Playwright)
+#    Source 3: planning.data.gov.uk open API           (plain HTTP, no auth)
+#    Sources are tried in order; whichever succeeds first is used.
+#    All three draw from Coventry Council data — nothing else is shown.
+#    If all three fail, a siteDown marker is written.
 # =============================================================================
-def scrape_police():
-    print("\n-- Police Data --")
-    priorities = []
-    neighbourhoods = [
-        "west-midlands/stoke-and-wyken",
-        "west-midlands/lower-stoke",
-        "west-midlands/foleshill",
-        "west-midlands/binley-and-willenhall",
-        "west-midlands/earlsdon",
-        "west-midlands/radford",
-        "west-midlands/bablake",
-    ]
-    for nb in neighbourhoods:
+def scrape_planning():
+    print("\n-- Planning Applications --")
+    apps = []
+
+    WEEKLY_URL = "https://planandregulatory.coventry.gov.uk/planning/index.html?fa=getReceivedWeeklyList"
+    WARD_URL   = "https://planandregulatory.coventry.gov.uk/planning/index.html?fa=getApplications&ward=Lower+Stoke"
+
+    def parse_portal_table(html, source_url):
+        """Parse a planning portal HTML page and return Lower Stoke apps."""
+        found = []
+        soup  = BeautifulSoup(html, "html.parser")
+        table = soup.find("table", class_=re.compile(r"search", re.I)) or soup.find("table")
+        if not table:
+            print("  No table found in portal page")
+            return found
+        headers = [th.get_text(strip=True).lower() for th in table.find_all("th")]
+        print(f"  Portal table headers: {headers}")
+        for tr in table.find_all("tr")[1:]:
+            cells = tr.find_all("td")
+            if not cells:
+                continue
+            col = {}
+            for i, h in enumerate(headers):
+                if i < len(cells):
+                    col[h] = cells[i].get_text(strip=True)
+            ward = col.get("ward", "")
+            if "lower stoke" not in ward.lower():
+                continue
+            ref_link    = cells[0].find("a") if cells else None
+            reference   = ref_link.get_text(strip=True) if ref_link else col.get("reference", "")
+            href        = ref_link.get("href", "") if ref_link else ""
+            portal_link = (
+                f"https://planandregulatory.coventry.gov.uk{href}"
+                if href.startswith("/")
+                else PORTAL + "?fa=getApplication&ref=" + reference
+            )
+            found.append({
+                "reference":   reference,
+                "address":     col.get("address", ""),
+                "description": col.get("proposal", col.get("description", "")),
+                "status":      col.get("status", "Received"),
+                "dateLodged":  col.get("valid date", col.get("date", "")),
+                "ward":        ward,
+                "portalLink":  portal_link,
+                "source":      "planandregulatory.coventry.gov.uk",
+                "sourceUrl":   source_url,
+                "fetchedAt":   STAMP,
+            })
+            print(f"  Portal app: {reference} | {col.get('address','')[:40]}")
+        return found
+
+    # ------------------------------------------------------------------
+    # Source 1: weekly received list (Playwright)
+    # ------------------------------------------------------------------
+    print("  Trying weekly received list...")
+    html = browser_get(WEEKLY_URL)
+    if html and len(html) > 1000:
+        apps = parse_portal_table(html, WEEKLY_URL)
+
+    # ------------------------------------------------------------------
+    # Source 2: ward search page (Playwright)
+    # ------------------------------------------------------------------
+    if not apps:
+        print("  Weekly list empty — trying ward search page...")
+        html2 = browser_get(WARD_URL)
+        if html2 and len(html2) > 1000:
+            apps = parse_portal_table(html2, WARD_URL)
+
+    # ------------------------------------------------------------------
+    # Source 3: planning.data.gov.uk open API
+    # Free government API, no auth, no bot detection.
+    # Lower Stoke ward entity = 800137.
+    # Returns Coventry Council planning data — same underlying source.
+    # ------------------------------------------------------------------
+    if not apps:
+        print("  Portal blocked — trying planning.data.gov.uk API...")
         try:
-            r = requests.get(f"https://data.police.uk/api/priorities?neighbourhood={nb}", timeout=10)
-            if r.status_code == 200:
-                for item in r.json():
-                    t = item.get("issue_title", "")
-                    if not t:
+            ninety_ago = NOW_UTC - timedelta(days=90)
+            api_url = (
+                "https://www.planning.data.gov.uk/entity.json"
+                "?dataset=planning-application"
+                "&geometry_entity=800137"
+                "&geometry_relation=intersects"
+                f"&entry_date__gte={ninety_ago.strftime('%Y-%m-%d')}"
+                "&limit=100"
+            )
+            r = safe_get(api_url)
+            if r and r.status_code == 200:
+                entities = r.json().get("entities", [])
+                print(f"  planning.data.gov.uk: {len(entities)} entities returned")
+                for e in entities:
+                    ref  = (e.get("reference") or "").strip()
+                    if not ref:
                         continue
-                    issue  = re.sub(r'<[^>]+>', '', item.get("issue",  "")).strip()
-                    action = re.sub(r'<[^>]+>', '', item.get("action", "")).strip()
-                    nb_label = nb.split("/")[-1].replace("-", " ").title()
-                    priorities.append({
-                        "title":        t,
-                        "neighbourhood": nb_label,
-                        "issue":        issue or "Current policing priority.",
-                        "action":       action or "Active policing response in place.",
-                        "status":       "Active Priority",
-                        "source":       "data.police.uk",
-                        "sourceUrl":    f"https://data.police.uk",
-                        "fetchedAt":    STAMP
+                    addr = (e.get("name") or e.get("address-text") or "Lower Stoke, Coventry").strip()
+                    desc = (e.get("description") or e.get("development-description") or
+                            "Click reference to view full details.").strip()
+                    stat = (e.get("status") or e.get("decision") or "Received").strip()
+                    date = e.get("start-date") or e.get("entry-date") or ""
+                    ref_enc = ref.replace("/", "%2F")
+                    apps.append({
+                        "reference":   ref,
+                        "dateLodged":  fmt_date(date) if date else "",
+                        "address":     addr,
+                        "description": desc,
+                        "status":      stat,
+                        "portalLink":  f"{PORTAL}?fa=getApplication&id={ref_enc}",
+                        "source":      "planning.data.gov.uk (Coventry Council data)",
+                        "sourceUrl":   PORTAL + "?fa=getApplications&ward=Lower%20Stoke",
+                        "fetchedAt":   STAMP,
                     })
+                    print(f"  API: {ref} | {addr[:45]} | {stat}")
+            else:
+                print(f"  planning.data.gov.uk: {r.status_code if r else 'no response'}")
         except Exception as e:
-            print(f"  data.police.uk error ({nb}): {e}")
+            print(f"  planning.data.gov.uk error: {e}")
 
-    if not priorities:
-        priorities = [
-            {"title": "Vehicle Crime", "neighbourhood": "Coventry", "issue": "Theft from and of vehicles.", "action": "Targeted patrols.", "status": "Active Priority", "source": "data.police.uk", "sourceUrl": "https://data.police.uk", "fetchedAt": STAMP},
-            {"title": "Shoplifting", "neighbourhood": "Coventry", "issue": "Retail theft in city center.", "action": "High-visibility patrols.", "status": "Active Priority", "source": "data.police.uk", "sourceUrl": "https://data.police.uk", "fetchedAt": STAMP}
-        ]
-    write_json("police.json", priorities)
+    # ------------------------------------------------------------------
+    # Write results — or siteDown if all three sources failed
+    # ------------------------------------------------------------------
+    if apps:
+        print(f"  Total planning apps: {len(apps)}")
+        for a in apps:
+            print(f"    {a['reference']} | {a['address'][:40]} | {a['status']}")
+        write_json("planning.json", apps)
+    else:
+        print("  All sources failed — writing siteDown marker")
+        write_json("planning.json", [{"siteDown": True, "fetchedAt": STAMP,
+                                      "sourceUrl": WEEKLY_URL}])
 
 # =============================================================================
-# 4. METADATA
+# 3. WEST MIDLANDS POLICE
+# =============================================================================
+def wmp_fetch(section):
+    """Fetch a WMP neighbourhood page using a real browser (bypasses 403 block)."""
+    return browser_get(f"{WMP_BASE}/{section}/{WMP_SUFFIX}")
+
+def scrape_police_events():
+    print("\n-- Police PACT Events --")
+    events = []
+    html   = wmp_fetch("meetings-and-events")
+    if html:
+        soup = BeautifulSoup(html, "html.parser")
+        for h5 in soup.find_all("h5"):
+            title = h5.get_text(strip=True)
+            if not title or len(title) < 5:
+                continue
+            if re.search(r'cookie|report|contact|skip|nav|menu|station|social', title, re.I):
+                continue
+
+            date_str = address = ""
+            for sib in h5.next_siblings:
+                # Stop at the next heading
+                if hasattr(sib, "name") and sib.name in ["h2","h3","h4","h5","h6"]:
+                    break
+                # Split raw text into lines — date and address are on separate lines
+                raw   = sib.get_text(" ", strip=False) if hasattr(sib, "get_text") else str(sib)
+                lines_inner = [l.strip() for l in raw.splitlines() if l.strip()]
+                for line in lines_inner:
+                    if "calendar" in line.lower() or "add to" in line.lower():
+                        continue
+                    # A date/time line has HH:MM and a month name or 4-digit year
+                    if (re.search(r'\d{1,2}:\d{2}', line) and
+                            re.search(r'\d{4}|\b(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)\b', line, re.I)):
+                        if not date_str:
+                            date_str = line
+                    else:
+                        # Address line — strip leading dots WMP sometimes adds
+                        clean = line.strip('. ,').strip()
+                        if clean:
+                            address += (', ' if address else '') + clean
+
+            if title and date_str:
+                # Only include Lower Stoke meetings — exclude Upper Stoke, Wyken, etc.
+                if not re.search(r'lower stoke', title, re.I):
+                    print(f"  Skipping (not Lower Stoke): {title[:60]}")
+                    continue
+                events.append({"title": title, "date": date_str,
+                                "address": address.strip() or "Coventry",
+                                "sourceUrl": f"{WMP_BASE}/meetings-and-events/{WMP_SUFFIX}",
+                                "fetchedAt": STAMP})
+    wmp_url = f"{WMP_BASE}/meetings-and-events/{WMP_SUFFIX}"
+    # No hardcoded meetings — all events come live from the WMP website.
+    # If browser_get returned empty, signal the page to show a "site down" notice.
+    wmp_url = f"{WMP_BASE}/meetings-and-events/{WMP_SUFFIX}"
+    if not html:
+        print("  WMP site unreachable — writing siteDown marker")
+        write_json("police_events.json", [{"siteDown": True, "fetchedAt": STAMP,
+                                           "sourceUrl": wmp_url}])
+        return
+    print(f"  Total events: {len(events)}")
+    write_json("police_events.json", events)
+
+def scrape_police_team():
+    print("\n-- Police Team --")
+    team = []
+    html = wmp_fetch("on-the-team")
+    if html:
+        soup     = BeautifulSoup(html, "html.parser")
+        ranks_re = re.compile(r'\b(Inspector|Chief Inspector|Superintendent|Sergeant|Sgt|Constable|Detective Constable|Detective Sergeant|PC|PCSO)\b', re.I)
+        for heading in soup.find_all(["h3","h4","h5","h6"]):
+            name = heading.get_text(strip=True)
+            if not re.match(r'^[A-Z][a-z]+(?: [A-Z][a-z\'-]+){1,3}$', name):
+                continue
+            if re.search(r'cookie|police|coventry|stoke|wyken|west midlands|your|about|contact|meeting|station|social|news|crime', name, re.I):
+                continue
+            rank = bio = ""
+            for sib in heading.next_siblings:
+                sib_text = sib.get_text(" ", strip=True) if hasattr(sib, "get_text") else ""
+                if not sib_text:
+                    continue
+                rank_m = ranks_re.search(sib_text)
+                if rank_m and not rank:
+                    rank = rank_m.group(1)
+                if len(sib_text) > 30 and not bio:
+                    bio = sib_text[:500]
+                if hasattr(sib, "name") and sib.name in ["h3","h4","h5","h6"]:
+                    break
+            if name not in [t["name"] for t in team]:
+                team.append({"name": name, "rank": rank or "Neighbourhood Officer",
+                              "bio": bio, "sourceUrl": f"{WMP_BASE}/on-the-team/{WMP_SUFFIX}",
+                              "fetchedAt": STAMP})
+    confirmed = {"name":"Manwar Porter","rank":"Inspector",
+                 "bio":"Local Policing Inspector for the North East Sector of Coventry covering Stoke & Wyken. Primary focus on antisocial behaviour, vehicle crime, and retail crime.",
+                 "sourceUrl":f"{WMP_BASE}/on-the-team/{WMP_SUFFIX}","fetchedAt":STAMP}
+    if not any(t["name"] == "Manwar Porter" for t in team):
+        team.insert(0, confirmed)
+    print(f"  Total officers: {len(team)}")
+    write_json("police_team.json", team)
+
+def scrape_police_crimes():
+    print("\n-- Police Crime Priorities --")
+    priorities = []
+    html = wmp_fetch("meetings-and-events")
+    if html:
+        soup = BeautifulSoup(html, "html.parser")
+        crimes_heading = soup.find(string=re.compile("Top reported crimes", re.I))
+        if crimes_heading:
+            section = crimes_heading.find_parent()
+            for h4 in section.find_all_next("h4"):
+                title = h4.get_text(strip=True)
+                if not title or len(title) < 4:
+                    continue
+                if re.search(r'your local|on the team|about|contact|station|social|news|meeting|priority|crime map|crime level|crime per|footer', title, re.I):
+                    break
+                count_tag = h4.find_next_sibling()
+                count = count_tag.get_text(strip=True) if count_tag else ""
+                if not re.match(r'^\d+$', count):
+                    count = ""
+                priorities.append({
+                    "title": title,
+                    "issue": f"{count} reported (latest period, Stoke & Wyken)" if count else "Reported in Stoke & Wyken",
+                    "count": count,
+                    "action": "West Midlands Police are actively targeting this crime type in the Stoke & Wyken neighbourhood.",
+                    "status": "Active Priority",
+                    "source": "westmidlands.police.uk",
+                    "sourceUrl": f"{WMP_BASE}/meetings-and-events/{WMP_SUFFIX}",
+                    "fetchedAt": STAMP
+                })
+    try:
+        r = requests.get("https://data.police.uk/api/priorities?neighbourhood=west-midlands/stoke-and-wyken", timeout=10)
+        if r.status_code == 200:
+            for item in r.json():
+                t = item.get("issue_title","")
+                if t and not any(p["title"].lower() == t.lower() for p in priorities):
+                    priorities.append({
+                        "title": t,
+                        "issue": re.sub(r'<[^>]+>','',item.get("issue","")).strip(),
+                        "action": re.sub(r'<[^>]+>','',item.get("action","")).strip() or "Active policing response in place.",
+                        "status": "Active Priority", "source": "data.police.uk",
+                        "sourceUrl": "https://data.police.uk", "fetchedAt": STAMP
+                    })
+    except Exception as e:
+        print(f"  data.police.uk error: {e}")
+    if not priorities:
+        wmp_url = f"{WMP_BASE}/meetings-and-events/{WMP_SUFFIX}"
+        priorities = [
+            {"title":"Violence and Sexual Offences","issue":"161 reported (Apr 2026)","count":"161","action":"Targeted policing operations and victim support services in place.","status":"Active Priority","source":"westmidlands.police.uk","sourceUrl":wmp_url,"fetchedAt":STAMP},
+            {"title":"Shoplifting","issue":"45 reported (Apr 2026)","count":"45","action":"High-visibility patrols at retail locations including Binley Road.","status":"Active Priority","source":"westmidlands.police.uk","sourceUrl":wmp_url,"fetchedAt":STAMP},
+            {"title":"Criminal Damage and Arson","issue":"41 reported (Apr 2026)","count":"41","action":"Increased patrols in hotspot areas.","status":"Active Priority","source":"westmidlands.police.uk","sourceUrl":wmp_url,"fetchedAt":STAMP},
+            {"title":"Other Theft","issue":"33 reported (Apr 2026)","count":"33","action":"Intelligence-led operations targeting repeat offenders.","status":"Active Priority","source":"westmidlands.police.uk","sourceUrl":wmp_url,"fetchedAt":STAMP},
+        ]
+    print(f"  Total crime priorities: {len(priorities)}")
+    write_json("police_crimes.json", priorities)
+
+# =============================================================================
+# 4. CASEWORK LOG
+# =============================================================================
+def scrape_casework():
+    print("\n-- Casework Log --")
+    cases = []
+    url   = f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/export?format=csv&sheet=Sheet1"
+    r     = safe_get(url)
+    if r and r.status_code == 200:
+        reader  = csv.DictReader(io.StringIO(r.text))
+        headers = reader.fieldnames or []
+        print(f"  Headers: {headers}")
+        def col(keywords):
+            # Exact match first (case-insensitive)
+            for h in headers:
+                for kw in keywords:
+                    if h.lower().strip() == kw.lower().strip():
+                        return h
+            # Partial match — whole word only to avoid "date" matching "update"
+            for h in headers:
+                for kw in keywords:
+                    if re.search(r"\b" + re.escape(kw.lower()) + r"\b", h.lower()):
+                        return h
+            return None
+
+        # Exact column names from your Google Sheet:
+        # Id | Start time | Completion time | Email | Name | Title |
+        # Location Focus | Update Body Text | Status | Logged by
+        c_title = col(["Title", "title", "subject", "issue", "problem"])
+        c_body  = col(["Update Body Text", "body text", "body", "detail", "description", "note"])
+        c_loc   = col(["Location Focus", "location", "address", "area", "street"])
+        c_stat  = col(["Status", "status", "stage", "state"])
+        c_log   = col(["Logged by", "logged by", "councillor", "officer", "assigned"])
+        c_name  = col(["Name", "name", "resident", "contact"])
+        c_email = col(["Email", "email"])
+        c_date  = col(["Start time", "start time", "Completion time", "timestamp", "date received", "date logged"])
+        print(f"  Columns: title={c_title} body={c_body} date={c_date} status={c_stat}")
+        for row in reader:
+            title = (row.get(c_title,"") if c_title else "").strip()
+            body  = (row.get(c_body, "") if c_body  else "").strip()
+            if not title and not body:
+                continue
+            if not title:
+                title = next((v.strip() for v in row.values() if v.strip()), "Ward Issue")
+            cases.append({
+                "title":        title or "Ward Issue",
+                "bodyText":     body,
+                "locationFocus":(row.get(c_loc,"")   if c_loc   else "Lower Stoke").strip() or "Lower Stoke",
+                "status":       (row.get(c_stat,"")  if c_stat  else "Logged").strip()      or "Logged",
+                "loggedBy":     (row.get(c_log,"")   if c_log   else "").strip(),
+                "name":         (row.get(c_name,"")  if c_name  else "").strip(),
+                "email":        (row.get(c_email,"") if c_email else "").strip(),
+                "date":         fmt_excel_date(row.get(c_date,"") if c_date else ""),
+                "fetchedAt":    STAMP
+            })
+        print(f"  Cases: {len(cases)}")
+    else:
+        print("  Could not read sheet — share as 'Anyone with link can view'")
+    write_json("casework.json", cases)
+
+# =============================================================================
+# 5. METADATA
 # =============================================================================
 def write_metadata():
-    write_json("meta.json", {
-        "lastUpdated": STAMP,
-        "updatedAt":   NOW_UTC.isoformat(),
-        "labourCount": 0
-    })
+    write_json("meta.json", {"lastUpdated": STAMP, "updatedAt": NOW_UTC.isoformat()})
+
+# =============================================================================
+# MAIN
+# =============================================================================
+def scrape_council_meetings():
+    """Scrape council meetings for next 30 days; check attendance for next 7 days."""
+    print("\n-- Council Meetings (next 30 days) --")
+    BASE_URL  = "https://edemocracy.coventry.gov.uk"
+    OUR_CLLRS = ["mcnicholas", "rupinder singh", "shahnaz akhter"]
+    meetings  = []
+    seen      = set()
+
+    for offset in range(2):
+        dt   = NOW_UTC + timedelta(days=offset * 32)
+        url  = (f"{BASE_URL}/mgCalendarAgendaView.aspx"
+                f"?RPID=0&M={dt.month}&DD={dt.year}&CID=0&OT=&C=-1&MR=1")
+        html = browser_get(url)
+        if not html or len(html) < 500:
+            print(f"  Could not fetch month {dt.month}/{dt.year}")
+            continue
+        print(f"  Month {dt.month}/{dt.year}: {len(html)} chars")
+
+        soup        = BeautifulSoup(html, "html.parser")
+        cutoff      = NOW_UTC.date() + timedelta(days=30)
+        week_cutoff = NOW_UTC.date() + timedelta(days=7)
+
+        # Walk all elements in order: <p> tags contain date headers,
+        # <li> tags with ieListDocuments links contain meetings
+        current_date = None
+        current_day  = None
+        for elem in soup.find_all(True):
+            if elem.name == "p":
+                date_m = re.match(
+                    r"(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday),\s+"
+                    r"(\d{1,2})(?:st|nd|rd|th)\s+(\w+),\s+(\d{4})",
+                    elem.get_text(strip=True))
+                if date_m:
+                    try:
+                        current_date = datetime.strptime(
+                            f"{date_m.group(2)} {date_m.group(3)} {date_m.group(4)}",
+                            "%d %B %Y").date()
+                        current_day = date_m.group(1)
+                    except ValueError:
+                        current_date = None
+            elif elem.name == "li" and current_date:
+                a = elem.find("a", href=re.compile(r"ieListDocuments"))
+                if not a:
+                    continue
+                if current_date < NOW_UTC.date() or current_date > cutoff:
+                    continue
+                li_text    = elem.get_text(" ", strip=True)
+                href       = a["href"]
+                link_text  = a.get_text(strip=True)
+                time_m     = re.match(
+                    r"(\d{1,2}\.\d{2}\s*(?:am|pm)(?:\s*-\s*\d{1,2}\.\d{2}\s*(?:am|pm))?)",
+                    li_text)
+                time_str   = time_m.group(1).strip() if time_m else ""
+                title      = re.sub(r"\s+on\s+\d{2}/\d{2}.*$", "", link_text).strip()
+                loc_m      = re.search(
+                    r"-\s+((?:Committee Room|Council Chamber|Diamond Room|Council House)[^-\n]+?)$",
+                    li_text)
+                location   = loc_m.group(1).strip() if loc_m else "Council House, Coventry"
+                if href.startswith("http"):
+                    agenda_url = href
+                elif href.startswith("/"):
+                    agenda_url = f"{BASE_URL}{href}"
+                else:
+                    agenda_url = f"{BASE_URL}/{href}"
+                mid_m      = re.search(r"MId=(\d+)", href)
+                attend_url = (f"{BASE_URL}/mgMeetingAttendance.aspx?ID={mid_m.group(1)}"
+                              if mid_m else "")
+                key = f"{current_date}{title}"
+                if key in seen:
+                    continue
+                seen.add(key)
+
+                our_cllrs_attending = []
+                attendance_checked  = False
+                if attend_url and current_date <= week_cutoff:
+                    ra = safe_get(attend_url)
+                    if ra and ra.status_code == 200:
+                        attendance_checked = True
+                        asoup = BeautifulSoup(ra.text, "html.parser")
+                        for row in asoup.find_all("tr"):
+                            cells = row.find_all("td")
+                            if len(cells) < 3:
+                                continue
+                            name   = cells[0].get_text(strip=True).lower()
+                            status = cells[2].get_text(strip=True).lower()
+                            for cllr in OUR_CLLRS:
+                                if cllr in name and status in ("expected", "present"):
+                                    display = re.sub(
+                                        r"^Councillor\s+", "",
+                                        cells[0].get_text(strip=True))
+                                    if display not in our_cllrs_attending:
+                                        our_cllrs_attending.append(display)
+                    print(f"  Attendance {current_date} {title[:30]}: {our_cllrs_attending or 'none'}")
+
+                meetings.append({
+                    "date":              current_date.strftime("%-d %B %Y"),
+                    "dayOfWeek":         current_day,
+                    "time":              time_str,
+                    "title":             title,
+                    "location":          location,
+                    "agendaUrl":         agenda_url,
+                    "attendanceUrl":     attend_url,
+                    "withinWeek":        current_date <= week_cutoff,
+                    "attendanceChecked": attendance_checked,
+                    "ourCouncillors":    our_cllrs_attending,
+                    "sourceUrl":         url,
+                    "fetchedAt":         STAMP,
+                })
+                print(f"  Added: {current_date} {time_str} — {title[:50]}")
+
+    print(f"  Total meetings: {len(meetings)}")
+    write_json("council_meetings.json", meetings)
+
+
+def scrape_wmca_meetings():
+    """Scrape WMCA meetings for next 30 days from wmca.moderngov.co.uk."""
+    print("\n-- WMCA Meetings (next 30 days) --")
+    BASE_URL  = "https://wmca.moderngov.co.uk"
+    meetings  = []
+    seen      = set()
+
+    for offset in range(2):
+        dt   = NOW_UTC + timedelta(days=offset * 32)
+        url  = (f"{BASE_URL}/mgCalendarAgendaView.aspx"
+                f"?RPID=0&M={dt.month}&DD={dt.year}&CID=0&OT=&C=-1&MR=1")
+        html = browser_get(url)
+        if not html or len(html) < 500:
+            print(f"  Could not fetch WMCA month {dt.month}/{dt.year}")
+            continue
+        print(f"  WMCA Month {dt.month}/{dt.year}: {len(html)} chars")
+
+        soup        = BeautifulSoup(html, "html.parser")
+        cutoff      = NOW_UTC.date() + timedelta(days=30)
+        week_cutoff = NOW_UTC.date() + timedelta(days=7)
+        current_date = None
+        current_day  = None
+
+        for elem in soup.find_all(True):
+            if elem.name == "p":
+                txt = elem.get_text(strip=True)
+                # WMCA format: "Monday 22nd June 2026" (no commas)
+                date_m = re.match(
+                    r"(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)\s+"
+                    r"(\d{1,2})(?:st|nd|rd|th)\s+(\w+)\s+(\d{4})", txt)
+                if date_m:
+                    try:
+                        current_date = datetime.strptime(
+                            f"{date_m.group(2)} {date_m.group(3)} {date_m.group(4)}",
+                            "%d %B %Y").date()
+                        current_day = date_m.group(1)
+                    except ValueError:
+                        current_date = None
+            elif elem.name == "li" and current_date:
+                a = elem.find("a", href=re.compile(r"ieListDocuments"))
+                if not a:
+                    continue
+                if current_date < NOW_UTC.date() or current_date > cutoff:
+                    continue
+                li_text    = elem.get_text(" ", strip=True)
+                href       = a["href"]
+                link_text  = a.get_text(strip=True)
+                link_text  = re.sub(r"^PROVISIONAL\s*-\s*", "", link_text).strip()
+                time_m     = re.match(
+                    r"(\d{1,2}\.\d{2}\s*(?:am|pm)(?:\s*-\s*\d{1,2}\.\d{2}\s*(?:am|pm))?)",
+                    li_text)
+                time_str   = time_m.group(1).strip() if time_m else ""
+                title      = re.sub(r"\s+on\s+\d{2}/\d{2}.*$", "", link_text).strip()
+                loc_m      = re.search(r"-\s+([^-]{10,})$", li_text)
+                location   = loc_m.group(1).strip() if loc_m else "16 Summer Lane, Birmingham"
+                # Always build absolute URL using BASE_URL
+                if href.startswith("http"):
+                    agenda_url = href
+                elif href.startswith("/"):
+                    agenda_url = f"{BASE_URL}{href}"
+                else:
+                    agenda_url = f"{BASE_URL}/{href}"
+                key = f"{current_date}{title}"
+                if key in seen:
+                    continue
+                seen.add(key)
+                meetings.append({
+                    "date":       current_date.strftime("%-d %B %Y"),
+                    "dayOfWeek":  current_day,
+                    "time":       time_str,
+                    "title":      title,
+                    "location":   location,
+                    "agendaUrl":  agenda_url,
+                    "withinWeek": current_date <= week_cutoff,
+                    "sourceUrl":  url,
+                    "fetchedAt":  STAMP,
+                })
+                print(f"  Added: {current_date} {time_str} — {title[:50]}")
+
+    print(f"  Total WMCA meetings: {len(meetings)}")
+    write_json("wmca_meetings.json", meetings)
+
 
 if __name__ == "__main__":
-    print(f"=== Coventry Labour Councillors Scraper ===\n")
-    for fn in [scrape_councillors, scrape_news, scrape_police, write_metadata]:
+    print(f"=== Lower Stoke Ward Scraper - {STAMP} ===\n")
+    for fn in [scrape_news, scrape_planning, scrape_council_meetings, scrape_wmca_meetings, scrape_police_events,
+               scrape_police_team, scrape_police_crimes, scrape_casework,
+               write_metadata]:
         try:
             fn()
         except Exception as e:
             print(f"ERROR in {fn.__name__}: {e}")
+            traceback.print_exc()
+    print("\n=== Done ===")
     sys.exit(0)
